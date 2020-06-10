@@ -1,0 +1,49 @@
+'''
+函数说明:朴素贝叶斯分类器训练函数，多项式贝叶斯
+Parameters:
+    trainMatrix - 训练文档矩阵，即setOfWords2Vec返回的returnVec构成的矩阵
+    trainLabel - 训练类别标签向量，即loadDataSet返回的classVec
+Returns:
+    p0Vect - 正常邮件类的条件概率数组
+    p1Vect - 垃圾邮件类的条件概率数组
+    pAbusive - 文档属于垃圾邮件类的概率
+'''
+def trainNB0(trainMatrix, trainLabel):
+    numTrainDocs = len(trainMatrix)  # 计算训练的文档数目
+    numWords = len(trainMatrix[0])  # 计算每篇文档的词条数
+    pAbusive = sum(trainLabel) / float(numTrainDocs)  # 文档属于垃圾邮件类的概率
+    p0Num = np.ones(numWords)
+    p1Num = np.ones(numWords)  # 创建numpy.ones数组,词条出现数初始化为1,拉普拉斯平滑
+    p0Denom = 2.0
+    p1Denom = 2.0  # 分母初始化为2 ,拉普拉斯平滑
+    for i in range(numTrainDocs):
+        if trainLabel[i] == 1:  # 统计属于侮辱类的条件概率所需的数据，即P(w0|1),P(w1|1),P(w2|1)···
+            p1Num += trainMatrix[i]
+            p1Denom += sum(trainMatrix[i])
+        else:  # 统计属于非侮辱类的条件概率所需的数据，即P(w0|0),P(w1|0),P(w2|0)···
+            p0Num += trainMatrix[i]
+            p0Denom += sum(trainMatrix[i])
+    p1Vect = np.log(p1Num / p1Denom)
+    p0Vect = np.log(p0Num / p0Denom)   #对矩阵中每个元素，取对数，防止下溢出，数组除数字以e为低取对数
+    return p0Vect, p1Vect, pAbusive  #返回属于正常邮件类的条件概率数组，属于侮辱垃圾邮件类的条件概率数组，文档整体情况属于垃圾邮件类的概率
+
+
+'''
+函数说明:朴素贝叶斯分类器分类函数
+Parameters:
+	vec2Classify - 待分类的词条数组
+	p0Vec - 正常邮件类的条件概率数组
+	p1Vec - 垃圾邮件类的条件概率数组
+	pClass1 - 文档属于垃圾邮件的概率
+Returns:
+	0 - 属于正常邮件类
+	1 - 属于垃圾邮件类
+'''
+def classifyNB(vec2Classify, p0Vec, p1Vec, pClass1):
+    p1=sum(vec2Classify*p1Vec)+np.log(pClass1)   #每个词带概率求和
+    p0=sum(vec2Classify*p0Vec)+np.log(1.0-pClass1)
+    if p1 > p0:
+        return 1
+    else:
+        return 0
+ 
