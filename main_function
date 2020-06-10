@@ -1,0 +1,22 @@
+if __name__ == '__main__':
+    vocabList=make_Dictionary()
+    trainMat,TrainClasses=Vect_Read(vocabList,Train_Size,Train_Address)
+    testVect,key=Vect_Read(vocabList,Test_Size,Test_Address)
+    while 1:
+        a=input("'1':自己的朴素贝叶斯\n'2':SKLearn的朴素贝叶斯\n'3':BernoulliNB参数影响\n'4':SKLearn的SVM\n'5':SKLearn的Knn\n")
+        a=int(a)
+        if a==0: break
+        elif a==1:
+            p0V, p1V, pSpam = trainNB0(np.array(trainMat), np.array(TrainClasses))  # 训练朴素贝叶斯模型
+            count=0
+            for i in range(Test_Size):
+                if key[i]!=classifyNB(testVect[i],p0V, p1V, pSpam): count+=1
+            print("Accuracy:%.4f%%"%((1-count/Test_Size)*100))
+        elif a==2:
+            Bayes(trainMat,TrainClasses,key,testVect)
+        elif a==3:
+            bernoulliNB(trainMat,TrainClasses,key,testVect)
+        elif a==4:
+            svm(trainMat,TrainClasses,key,testVect)
+        elif a==5:
+            Knn(trainMat,TrainClasses,key,testVect)
