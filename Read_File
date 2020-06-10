@@ -1,0 +1,70 @@
+'''
+函数说明:接收一个大字符串并将其解析为字符串列表
+'''
+def textParse(bigString):  # 将字符串转换为字符列表
+    listOfTokens = re.split(r'\W+', bigString)  # 将特殊符号作为切分标志对长字符串进行切分，即非字母、非数字
+    #print(listOfTokens)
+    return [tok.lower() for tok in listOfTokens if len(tok) > 2]  # 除了单个字母，例如大写的I，其它单词变成小写
+
+'''
+函数说明:根据vocabList词汇表，将inputSet向量化，向量的每个元素为1或0
+Parameters:
+    vocabList - createVocabList返回的列表
+    inputSet - 切分的词条列表
+Returns:
+    returnVec - 文档向量,词集模型
+'''
+def setOfWords2Vec(vocabList, inputSet):
+    returnVec = [0] * len(vocabList)               #创建一个其中所含元素都为0的向量
+    for word in inputSet:                          #遍历每个词条
+        if word in vocabList:                      #如果词条存在于词汇表中，则置1
+            returnVec[vocabList.index(word)] += 1
+    return returnVec        #返回文档向量
+'''
+函数说明：得到前3000个高频词
+'''
+def make_Dictionary():
+    emails_dirs = [os.path.join(Train_Address,f) for f in os.listdir(Train_Address)]    
+    all_words = []       
+    for emails_dir in emails_dirs:
+        emails = [os.path.join(emails_dir,f) for f in os.listdir(emails_dir)]
+        for mail in emails:
+            with open(mail) as m:
+                for line in m:
+                    words = line.split()
+                    all_words += words
+    dictionary = Counter(all_words)
+    list_to_remove = list(dictionary.keys())
+    for item in list_to_remove:
+        if item.isalpha() == False:   #不是字母进行删除
+            del dictionary[item]
+        elif len(item) == 1:          #大小为单，进行删除
+            del dictionary[item]
+    dictionary = dictionary.most_common(3000)
+    vocabList=[]
+    for (a,k) in dictionary:
+        vocabList.append(a)
+    return vocabList
+
+'''
+读取训练集与测试集的向量
+'''
+def Vect_Read(vocabList,Size,Address): 
+    docID = 0
+    features_matrix = np.zeros((Size,3000))
+    labels = np.zeros(Size)    
+    emails_dirs = [os.path.join(Address,f) for f in os.listdir(Address)]#获取文件夹中所有文件夹的地址 
+    for emails in emails_dirs:
+        email = [os.path.join(emails,f) for f in os.listdir(emails)]
+        for mail in email:
+            all_words = textParse(open(mail).read())
+            for word in all_words:
+                if word in vocabList:
+                    features_matrix[docID,vocabList.index(word)] = all_words.count(word)
+            name=mail.split('\\')[-1]               #对邮件名进行分拆
+            labels[docID] = int(name[0:3]== 'spm')
+            docID = docID + 1
+    return features_matrix,labels
+
+    
+    
