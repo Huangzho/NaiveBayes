@@ -1,0 +1,111 @@
+'''
+函数说明：不同bayes分类器的横向对比
+参数：训练集数据，训练集标签，验证集数据，验证集标签
+'''
+def Bayes(trainMat,TrainClasses,key,testVect):
+    Time_count=[]
+    Accuracy=[]
+    X=["MultinomialNB","GaussianNB","BernoulliNB"]
+    start=time.time()   #时间测量
+    clf = naive_bayes.MultinomialNB(alpha=1.0,fit_prior=True,class_prior=None)#平滑参数，是否学习先验概率，指定先验概率
+    clf.fit(trainMat,TrainClasses)
+    a=clf.score(testVect,key)   #准确率
+    end=time.time()
+    Time_count.append(end-start)   #储存数据
+    Accuracy.append(a)
+
+    start=time.time()
+    clf = naive_bayes.GaussianNB(priors=None)#参数：指定先验概率
+    clf.fit(trainMat,TrainClasses)
+    a=clf.score(testVect,key)
+    end=time.time()
+    Time_count.append(end-start)
+    Accuracy.append(a)
+
+    start=time.time()
+    clf=naive_bayes.BernoulliNB(alpha=1.0, fit_prior=True, class_prior=None)#其中还有有binarize二值化参数
+    clf.fit(trainMat,TrainClasses)
+    a=clf.score(testVect,key)
+    end=time.time()
+    Time_count.append(end-start)
+    Accuracy.append(a)
+    
+    
+    fig,ax1 = plt.subplots()
+    ax2 = ax1.twinx()
+    ax1.plot(X,Accuracy,'g-',marker='o')
+    ax2.plot(X,Time_count,'b-',marker='s')
+    ax1.set_xlabel("kinds")
+    ax1.set_ylabel("accuracy",color='g')
+    ax2.set_ylabel("time/s",color='b')
+    plt.title('Accuracy & Time')
+    plt.show()
+    print(Accuracy[0])
+
+
+def bernoulliNB(trainMat,TrainClasses,key,testVect):
+    Accuracy=[]
+    X=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+    for i in X:
+        clf=naive_bayes.BernoulliNB(alpha=1.0, binarize=i,fit_prior=True, class_prior=None)#其中还有有binarize二值化参数
+        clf.fit(trainMat,TrainClasses)
+        Accuracy.append(clf.score(testVect,key))
+        print(Accuracy[i])
+    plt.plot(X,Accuracy,marker='o')
+    plt.xlabel('binarize') #设置横坐标说明
+    plt.ylabel('accuracy') #设置纵坐标说明
+    plt.title('BERNOULLINB')#添加标题
+    plt.show()
+    print(Accuracy[0])
+
+def svm(trainMat,TrainClasses,key,testVect):
+    X=[-4,-3,-2,-1,0,1,2,3,4]
+    linear=[]
+    rbf=[]
+    for i in X:
+        print(i)
+        clf=SVC(C=10**i,kernel='linear')
+        clf.fit(trainMat,TrainClasses)
+        linear.append(clf.score(testVect,key))
+        print(linear[i+4])
+        clf=SVC(C=10**i,kernel='rbf')
+        clf.fit(trainMat,TrainClasses)
+        rbf.append(clf.score(testVect,key))
+        print(rbf[i+4])
+    plt.plot(X, linear, marker='o', ms=2,label='linear')
+    plt.plot(X, rbf, marker='*',ms=2,label='rbf')
+    plt.xlabel("C/10**X") #X轴标签
+    plt.legend()
+    plt.ylabel("accuracy") #Y轴标签
+    plt.title("SVM") #标题
+    plt.show()
+
+def Knn(trainMat,TrainClasses,key,testVect):
+    p1=[]
+    p2=[]
+    p3=[]
+    p4=[]
+    X=[1,2,3,4,5,6,7,8,9,10]
+    for i in X:
+        knn_clf=KNeighborsClassifier(n_neighbors=i,p=1)
+        knn_clf.fit(trainMat,TrainClasses)
+        p1.append(knn_clf.score(testVect,key))
+        knn_clf=KNeighborsClassifier(n_neighbors=i,p=2)
+        knn_clf.fit(trainMat,TrainClasses)
+        p2.append(knn_clf.score(testVect,key))
+        knn_clf=KNeighborsClassifier(n_neighbors=i,p=3)
+        knn_clf.fit(trainMat,TrainClasses)
+        p3.append(knn_clf.score(testVect,key))
+        knn_clf=KNeighborsClassifier(n_neighbors=i,p=4)
+        knn_clf.fit(trainMat,TrainClasses)
+        p4.append(knn_clf.score(testVect,key))
+    plt.plot(X, p1, marker='o', ms=2,label='p1')
+    plt.plot(X, p2, marker='*',ms=2,label='p2')
+    plt.plot(X, p3, marker='s', ms=2,label='p3')
+    plt.plot(X, p4, marker='p', ms=2,label='p4')
+    plt.xlabel("k") #X轴标签
+    plt.legend()
+    plt.ylabel("accuracy") #Y轴标签
+    plt.title("KNN") #标题
+    plt.show()
+    print(p3[2])
